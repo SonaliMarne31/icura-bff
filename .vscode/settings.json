@@ -1,0 +1,23 @@
+{
+    "dbcode.connections": [
+        {
+            "connectionId": "8CbuGVZfbIAq1V0ZkVcYT",
+            "name": "icura_db_local",
+            "driver": "postgres",
+            "connectionType": "host",
+            "host": "localhost",
+            "port": 5432,
+            "ssl": false,
+            "authMethod": "password",
+            "username": "postgres",
+            "password": "",
+            "savePassword": "secretStorage",
+            "database": "postgres",
+            "readOnly": false,
+            "role": "development",
+            "postConnectionSqlType": "inline",
+            "connectionTimeout": 30,
+            "pinnedConnectionTimeout": "0"
+        }
+    ]
+}

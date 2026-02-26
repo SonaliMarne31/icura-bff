@@ -18,50 +18,6 @@ const pool = new Pool({
 const JWT_SECRET = process.env.JWT_SECRET;     // min 32 chars, never commit
 const JWT_EXPIRES = process.env.JWT_EXPIRES || '1h';
 
-async function getPendingTasks(doctorId, clinicId) {
-  const tasks = await pool.query(`
-    SELECT id, title, description, status, due_date
-    FROM tasks
-    WHERE doctor_id = $1  
-      AND clinic_id = $2  
-    ORDER BY due_date ASC
-  `, [doctorId, clinicId]);
-
-  return tasks.rows;
-}
-
-async function getAppointments(doctorId, clinicId) {
-  const appts = await pool.query(`
-    SELECT
-        a.id,
-        a.status,
-        a.reason,
-        a.notes,
-        a.start_time,
-        a.end_time,
-        a.timezone,
-        a.appointment_type,
-        a.doctor_id,
-        a.clinic_id,
-        p.id          AS patient_id,
-        p.first_name,           -- ✅ no alias needed
-        p.last_name,            -- ✅ no alias needed
-        p.dob,
-        p.phone,
-        p.email
-    FROM appointments a
-    JOIN patients p ON a.patient_id = p.id
-    WHERE a.doctor_id = $1
-      AND a.clinic_id = $2
-    ORDER BY a.start_time ASC
-`, [doctorId, clinicId]);
-
-
-  return appts.rows;
-
-}
-
-
 async function registerClaims(email, password, clinicCode) {
 
   // 1. Look up clinic by code
@@ -92,8 +48,7 @@ async function registerClaims(email, password, clinicCode) {
     throw new Error('Account is inactive');
   }
 
-  // 4. Verify password
-  console.log('doctor.password_hash', doctor.password_hash, ' password ', password);
+  // 4. Verify password - password_hash stored in the DB column ( encrypted password )
   const valid = await bcrypt.compare(password, doctor.password_hash);
 
   if (!valid) {
@@ -126,18 +81,16 @@ function verifyToken(req, res, next) {
       return res.status(401).json({ error: 'No token provided' });
     }
 
-    // ✅ extract token from "Bearer <token>"
+    //extract token from "Bearer <token>"
     const token = authHeader.split(' ')[1];
 
-    // ✅ verify signature, expiry, issuer, audience
+    //verify signature, expiry, issuer, audience
     const decoded = jwt.verify(token, JWT_SECRET, {
       issuer: 'medportal-bff',
       audience: 'medportal-api',
     });
 
-    console.log('decoded claims:', decoded);
-
-    // ✅ attach to req.user — available in every route handler below
+    //attach to req.user — available in every route handler below
     req.user = {
       doctorId: decoded.doctorId,
       clinicId: decoded.clinicId,

@@ -69,3 +69,24 @@ app.get('/appointments', verifyToken, async (req, res) => {
     }
 });
 
+app.patch('/appointments/:id/reschedule', verifyToken, async (req, res) => {
+    const { id } = req.params;  // ✓ extract id from route
+    try {
+        const backendUrl = process.env.BACKEND_API_URL || 'http://localhost:8000';
+        const response = await axios.patch(
+            `${backendUrl}/appointments/${id}/reschedule`,  // ✓ real id in URL
+            req.body,                                       // ✓ body as 2nd arg
+            {
+                headers: { Authorization: req.headers.authorization }  // ✓ config as 3rd arg
+            }
+        );
+
+        return res.json(response.data);
+
+    } catch (err) {
+        return res.status(err.response?.status || 500).json({
+            message: err.response?.data?.message || 'Backend unreachable'
+        });
+    }
+});
+

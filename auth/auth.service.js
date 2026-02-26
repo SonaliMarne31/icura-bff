@@ -107,4 +107,4 @@ function verifyToken(req, res, next) {
   }
 }
 
-module.exports = { registerClaims, verifyToken, getPendingTasks, getAppointments };
+module.exports = { registerClaims, verifyToken };

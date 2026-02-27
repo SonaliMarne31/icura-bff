@@ -9,7 +9,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors()); // Allow all origins for testing
 
-
+const backendUrl = process.env.BACKEND_API_URL || 'http://localhost:8000';
 const PORT = 8080;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`>>> Server is live at http://localhost:${PORT}`);
@@ -43,7 +43,6 @@ app.post('/registerClaims', validateToken, async (req, res, next) => {
 app.get('/pendingTasks', verifyToken, async (req, res) => {
 
     try {
-        const backendUrl = process.env.BACKEND_API_URL || 'http://localhost:8000';
         // Call the internal backend service
         const { data } = await axios.get(`${backendUrl}/get-all-tasks`, {
             headers: { Authorization: req.headers.authorization }
@@ -58,7 +57,7 @@ app.get('/pendingTasks', verifyToken, async (req, res) => {
 app.get('/appointments', verifyToken, async (req, res) => {
 
     try {
-        const backendUrl = process.env.BACKEND_API_URL || 'http://localhost:8000';
+        
         // Call the internal backend service
         const { data } = await axios.get(`${backendUrl}/get-all-appointments`, {
             headers: { Authorization: req.headers.authorization }
@@ -72,7 +71,6 @@ app.get('/appointments', verifyToken, async (req, res) => {
 app.patch('/appointments/:id/reschedule', verifyToken, async (req, res) => {
     const { id } = req.params;  // ✓ extract id from route
     try {
-        const backendUrl = process.env.BACKEND_API_URL || 'http://localhost:8000';
         const response = await axios.patch(
             `${backendUrl}/appointments/${id}/reschedule`,  // ✓ real id in URL
             req.body,                                       // ✓ body as 2nd arg

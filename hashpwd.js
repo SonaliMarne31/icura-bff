@@ -1,0 +1,1 @@
+node -e "require('bcrypt').hash('Hello3131',12).then(console.log)"  

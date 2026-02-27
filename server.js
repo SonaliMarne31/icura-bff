@@ -40,24 +40,55 @@ app.post('/registerClaims', validateToken, async (req, res, next) => {
     }
 });
 
+// app.get('/pendingTasks', verifyToken, async (req, res) => {
+
+//     try {
+//         // Call the internal backend service
+//         const { data } = await axios.get(`${backendUrl}/get-all-tasks`, {
+//             headers: { Authorization: req.headers.authorization }
+//         });
+//         return res.json(data);
+//     } catch (err) {
+//         return res.status(err.response?.status || 500).json({ message: "Backend unreachable" });
+//     }
+
+// });
+
 app.get('/pendingTasks', verifyToken, async (req, res) => {
+    const query = `
+    query {
+      allTasks {
+        id
+        title
+        description
+        status
+        due_date
+        }
+    }
+  `;
 
     try {
-        // Call the internal backend service
-        const { data } = await axios.get(`${backendUrl}/get-all-tasks`, {
-            headers: { Authorization: req.headers.authorization }
-        });
-        return res.json(data);
+        const { data } = await axios.post(
+            `${backendUrl}/graphql`,
+            { query },
+            { headers: { Authorization: req.headers.authorization } }
+        );
+
+        if (data.errors) {
+            return res.status(500).json({ message: data.errors[0].message });
+        }
+
+        return res.json(data.data.allTasks);
     } catch (err) {
         return res.status(err.response?.status || 500).json({ message: "Backend unreachable" });
     }
-
 });
+
 
 app.get('/appointments', verifyToken, async (req, res) => {
 
     try {
-        
+
         // Call the internal backend service
         const { data } = await axios.get(`${backendUrl}/get-all-appointments`, {
             headers: { Authorization: req.headers.authorization }
